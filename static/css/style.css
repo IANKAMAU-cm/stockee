@@ -1,0 +1,189 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: beige;
+    color: black;
+}
+
+
+/*Header style */
+header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: darkgoldenrod;
+    color: wheat;
+}
+
+.logo{
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.search-bar input{
+    padding: 5px;
+    width: 300px;
+
+}
+
+.user-profile{
+    display: flex;
+    gap: 20px;
+}
+
+.user-profile div{
+    cursor: pointer;
+}
+
+/*sidebar style */
+.sidebar{
+    width: 200px;
+    background-color: rgb(163, 218, 35);
+    color: black;
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    padding: 20px;
+}
+
+.sidebar ul{
+    list-style-type: none;
+}
+
+.sidebar li{
+    margin: 15px 0;
+    cursor: pointer;
+}
+
+/*Main content style */
+main{
+    margin-left: 220px;
+    padding: 20px;
+    padding-top: 60px;
+}
+
+.overview-panel{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.card{
+    background-color: beige;
+    padding: 20px;
+    width: 24%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    text-align: center;
+}
+
+.grapical-reports .graph{
+    background-color: beige;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+.quick-actions button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: beige;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/*Footer style*/
+footer{
+    text-align: center;
+    padding: 20px;
+    background-color: beige;
+    color: black;
+}
+
+footer a{
+    color: black;
+    text-decoration: none;
+}
+
+.login-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: aquamarine;
+}
+
+.login-box{
+    background-color: aquamarine;
+    padding: 20px 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    text-align: center;
+    width: 300px;
+}
+
+.login-box h2{
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: black;
+}
+
+.input-group{
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label{
+    display: block;
+    margin-bottom: 5px;
+    color: black;
+}
+
+.input-group input{
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+button{
+    width: 100%;
+    padding: 10px;
+    background-color: aquamarine;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.register-container{
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary{
+    background-color: beige;
+    border: none;
+}
+
+.btn-primary:hover{
+    background-color: blanchedalmond;
+}
+
+a {
+    color: black;
+}
+
+a:hover{
+    color: azure;
+}

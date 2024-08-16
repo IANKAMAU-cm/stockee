@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stockee</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    </head>
+
+    <body>
+        <!--Header-->
+        <header>
+            <div class="logo">Stockee</div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search...">
+            </div>
+
+            <div class="user-profile">
+                <div class="profile-icon">Profile</div>
+                <div class="settings-icon">Settings</div>
+            </div>
+        </header>
+
+        <!--sidebar navigation-->
+        <nav class="sidebar">
+            <ul>
+                <li>Dashboard</li>
+                <li>Inventory</li>
+                <li>Orders</li>
+                <li>Reports</li>
+                <li>Notifications</li>
+                <li>Settings</li>
+                <li>User Management</li>
+            </ul>
+        </nav>
+
+        <!--Main Dashboard area-->
+        <main>
+            <!--Overview Panel-->
+            <section class="overview-panel">
+                <div class="card">Total Inventory Value</div>
+                <div class="card">Low Stock Items</div>
+                <div class="card">Recent Orders</div>
+                <div class="card">Sales Trends</div>
+            </section>
+
+            <!--Graphical Reports-->
+            <section class="graphical-reports">
+                <div class="graph">Sales Over Time</div>
+                <div class="graph">Stock Levels by Category</div>
+                <div class="graph">Top-Selling Products</div>
+            </section>
+
+            <!--Quick actions-->
+            <section class="quick-actions">
+                <button>Add New Product</button>
+                <button>Generate report</button>
+                <button>Notifications</button>
+            </section>
+
+        </main>
+
+        <!--Footer-->
+        <footer>
+            <p><a href="#">Help/Support</a> | <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a></p>
+        </footer>
+
+        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    </body>
+</html>
