@@ -18,13 +18,14 @@
             <div class="user-profile">
                 <div class="profile-icon">Profile</div>
                 <div class="settings-icon">Settings</div>
+                <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
             </div>
         </header>
 
         <!--sidebar navigation-->
         <nav class="sidebar">
             <ul>
-                <li>Dashboard</li>
+                <li><a href="{{ url_for('index') }}">Dashboard</a></li>
                 <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
                 <li><a href="{{ url_for('orders') }}">Orders</a></li>
                 <li><a href="{{ url_for('reports') }}">Reports</a></li>

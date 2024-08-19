@@ -172,7 +172,7 @@ button{
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f4f4f4;
+    background-color: #f8c361;
 }
 
 .register-box {
@@ -204,21 +204,21 @@ button{
     width: 100%;
     padding: 10px;
     background-color: #007bff;
-    color: white;
+    color: rgb(45, 230, 199);
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
 .btn:hover {
-    background-color: #0056b3;
+    background-color: #41ee89;
 }
 
 ul {
     list-style: none;
     padding: 0;
     margin: 10px 0;
-    color: red;
+    color: rgb(51, 201, 176);
 }
 
 ul li {
@@ -251,4 +251,15 @@ ul {
 
 ul li {
     margin-bottom: 5px;
+}
+/*logout button/link*/
+.logout-button {
+    color: beige;
+    font-weight: bold;
+    text-decoration: none;
+    margin-left: 20px;
+}
+
+.logout-button:hover {
+    color: rgb(233, 217, 77);
 }
