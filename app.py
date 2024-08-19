@@ -36,7 +36,7 @@ def register():
             flash('Username already exists')
             return redirect(url_for('register'))
 
-        hashed_password = generate_password_hash(password, method='sha256')
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         new_user = User(username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
@@ -58,7 +58,33 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+@app.route('/inventory')
+def inventory():
+    return render_template('inventory.html')
+
+@app.route('/orders')
+def orders():
+    return render_template('orders.html')
+
+@app.route('/reports')
+def reports():
+    return render_template('reports.html')
+
+@app.route('/notifications')
+def notifications():
+    return render_template('notifications.html')
+
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
+
+@app.route('/users')
+def users():
+    return render_template('users.html')
+
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+

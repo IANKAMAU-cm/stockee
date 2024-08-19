@@ -25,12 +25,12 @@
         <nav class="sidebar">
             <ul>
                 <li>Dashboard</li>
-                <li>Inventory</li>
-                <li>Orders</li>
-                <li>Reports</li>
-                <li>Notifications</li>
-                <li>Settings</li>
-                <li>User Management</li>
+                <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+                <li><a href="{{ url_for('orders') }}">Orders</a></li>
+                <li><a href="{{ url_for('reports') }}">Reports</a></li>
+                <li><a href="{{ url_for('notifications') }}">Notifications</a></li>
+                <li><a href="{{ url_for('settings') }}">Settings</a></li>
+                <li><a href="{{ url_for('users') }}">User Management</a></li>
             </ul>
         </nav>
 
