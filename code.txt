@@ -6,10 +6,22 @@ from models import db, User
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+#db = SQLAlchemy(app)
 
-# Initialize the db with the Flask app
+#initialize the db with the flask app
 db.init_app(app)
 
+# user model
+#class User(db.Model):
+#    id = db.Column(db.Integer, primary_key=True)
+#    username = db.Column(db.String(150), nullable=False, unique=True)
+#    password = db.Column(db.String(150), nullable=False)
+
+#create the db
+#with app.app_context():
+#    db.create_all()
+
+#route for login page
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -24,20 +36,29 @@ def login():
             flash('Login Failed. Check your Username and Password.')
             return redirect(url_for('login'))
     
+    # If it's a GET request, render the login page
     return render_template('login.html')
 
+
+
+
+
+#route for account creation
 @app.route('/register', methods=['POST', 'GET'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
 
+        #check if user exists
         if User.query.filter_by(username=username).first():
             flash('Username already exists')
             return redirect(url_for('register'))
-
-        hashed_password = generate_password_hash(password, method='sha256')
-        new_user = User(username=username, password=hashed_password)
+        
+        #create new user
+        #new_user = User(username=username, password=password)
+        hashed_password = generate_password_hash(request.form['password'], method='sha256')
+        new_user = User(username=request.form['username'], password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
 
@@ -45,6 +66,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+# route for the dashboard page
 @app.route('/')
 def index():
     if 'user_id' not in session:
@@ -60,5 +82,8 @@ def logout():
 
 if __name__ == '__main__':
     with app.app_context():
+        db.drop_all()
         db.create_all()
     app.run(debug=True)
+
+    
