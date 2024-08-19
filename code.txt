@@ -86,4 +86,59 @@ if __name__ == '__main__':
         db.create_all()
     app.run(debug=True)
 
-    
+
+
+
+
+Database Migration with Flask-Migrate
+
+To handle schema changes and migrations more efficiently, consider using Flask-Migrate. This tool helps manage database schema changes and is useful for evolving your schema over time.
+
+To get started with Flask-Migrate:
+
+    Install Flask-Migrate:
+
+    bash
+
+pip install Flask-Migrate
+
+Update Your Flask App:
+
+python
+
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+# Your models here
+
+Initialize Migrations:
+
+Run the following command to initialize migrations:
+
+bash
+
+flask db init
+
+Create a Migration Script:
+
+Whenever you make changes to your models, create a new migration script:
+
+bash
+
+flask db migrate -m "description of changes"
+
+Apply Migrations:
+
+Apply the migration script to update your database schema:
+
+bash
+
+flask db upgrade

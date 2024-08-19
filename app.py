@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User
+from models import db, User, InventoryItem
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -58,9 +58,53 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-@app.route('/inventory')
+@app.route('/inventory', methods=['GET'])
 def inventory():
-    return render_template('inventory.html')
+    items = InventoryItem.query.all()
+    return render_template('inventory.html', items=items)
+
+@app.route('/add-item', methods=['GET', 'POST'])
+def add_item():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        quantity = request.form.get('quantity')
+        price = request.form.get('price')
+        description = request.form.get('description')
+
+        new_item = InventoryItem(name=name, quantity=quantity, price=price, description=description)
+        db.session.add(new_item)
+        db.session.commit()
+
+        flash('Item added successfully.')
+        return redirect(url_for('inventory'))
+
+    return render_template('add_item.html')
+
+@app.route('/edit-item/<int:item_id>', methods=['GET', 'POST'])
+def edit_item(item_id):
+    item = InventoryItem.query.get_or_404(item_id)
+
+    if request.method == 'POST':
+        item.name = request.form.get('name')
+        item.quantity = request.form.get('quantity')
+        item.price = request.form.get('price')
+        item.description = request.form.get('description')
+
+        db.session.commit()
+
+        flash('Item updated successfully.')
+        return redirect(url_for('inventory'))
+
+    return render_template('edit_item.html', item=item)
+
+@app.route('/delete-item/<int:item_id>', methods=['POST'])
+def delete_item(item_id):
+    item = InventoryItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+
+    flash('Item deleted successfully.')
+    return redirect(url_for('inventory'))
 
 @app.route('/orders')
 def orders():
