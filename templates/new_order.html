@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order - Stockee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('index') }}">Dashboard</a>
+        <a href="{{ url_for('orders') }}">Orders List</a>
+    </header>
+    <main>
+        <h2>Create New Order</h2>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.inventory_item.label }} {{ form.inventory_item() }}
+            </div>
+            <div>
+                {{ form.quantity.label }} {{ form.quantity() }}
+            </div>
+            <div>
+                {{ form.submit() }}
+            </div>
+        </form>
+    </main>
+</body>
+</html>

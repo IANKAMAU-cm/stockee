@@ -23,6 +23,7 @@
                     </div>
                     <button type="submit">Login</button>
                 </form>
+                <p>Back to <a href="{{ url_for('products') }}">Products</a></p>
                 <p>Don't have an account? <a href="{{ url_for('register') }}">Create one here</a></p>
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}

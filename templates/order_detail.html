@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Stockee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        header a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-weight: bold;
+            color: #333;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .order-details, .order-items {
+            margin-bottom: 20px;
+        }
+
+        .order-details p, .order-items th, .order-items td {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('index') }}">Dashboard</a>
+        <a href="{{ url_for('orders') }}">Orders List</a>
+    </header>
+    <main>
+        <h2>Order Details</h2>
+        <div class="order-details">
+            <p>Order ID: {{ order.id }}</p>
+            <p>User ID: {{ order.user_id }}</p>
+            <p>Status: {{ order.status }}</p>
+            <p>Created At: {{ order.created_at }}</p>
+        </div>
+
+        <div class="dispatch-section">
+            {% if order.status != 'Dispatched' %}
+                <form action="{{ url_for('dispatch_order', order_id=order.id) }}" method="POST">
+                    <button type="submit">Dispatch Order</button>
+                </form>
+            {% else %}
+                <p>This order has been dispatched.</p>
+            {% endif %}
+        </div>
+        
+        <div class="order-items">
+            <h3>Items</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.inventory_item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price|currency }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </main>
+</body>
+</html>

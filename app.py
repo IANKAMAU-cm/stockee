@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from models import db, User, InventoryItem
+from models import db, User, InventoryItem, Order, OrderItem
+from forms import OrderForm
+from datetime import datetime
+
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -10,6 +14,19 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 # Initialize the db with the Flask app
 db.init_app(app)
 
+
+
+@app.before_request
+def before_request():
+    if 'cart' not in session:
+        session['cart'] = {}  # Initialize cart as a dictionary
+
+@app.route('/')
+def products():
+    items = InventoryItem.query.all()
+    return render_template('products.html', items=items)
+
+#login and registering
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -45,7 +62,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
-@app.route('/')
+@app.route('/index')
 def index():
     if 'user_id' not in session:
         flash('Please log in to access the dashboard')
@@ -58,6 +75,7 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+#inventory management
 @app.route('/inventory', methods=['GET'])
 def inventory():
     items = InventoryItem.query.all()
@@ -70,8 +88,9 @@ def add_item():
         quantity = request.form.get('quantity')
         price = request.form.get('price')
         description = request.form.get('description')
+        stock = request.form.get('stock')
 
-        new_item = InventoryItem(name=name, quantity=quantity, price=price, description=description)
+        new_item = InventoryItem(name=name, quantity=quantity, price=price, description=description, stock=stock)
         db.session.add(new_item)
         db.session.commit()
 
@@ -89,6 +108,7 @@ def edit_item(item_id):
         item.quantity = request.form.get('quantity')
         item.price = request.form.get('price')
         item.description = request.form.get('description')
+        item.stock = request.form.get('stock')
 
         db.session.commit()
 
@@ -96,20 +116,31 @@ def edit_item(item_id):
         return redirect(url_for('inventory'))
 
     return render_template('edit_item.html', item=item)
-
-@app.route('/delete-item/<int:item_id>', methods=['POST'])
+#deleting an item from inventory
+@app.route('/delete_item/<int:item_id>', methods=['POST'])
 def delete_item(item_id):
-    item = InventoryItem.query.get_or_404(item_id)
-    db.session.delete(item)
-    db.session.commit()
-
-    flash('Item deleted successfully.')
+    try:
+        # Fetch the item to be deleted
+        item = InventoryItem.query.get(item_id)
+        
+        # Check if the item exists
+        if not item:
+            flash('Item not found.', 'error')
+            return redirect(url_for('inventory_list'))
+        
+        # Remove all references to this item in other tables
+        OrderItem.query.filter_by(inventory_item_id=item_id).delete()
+        
+        # Delete the item
+        db.session.delete(item)
+        db.session.commit()
+        
+        flash('Item deleted successfully.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error occurred: {str(e)}', 'error')
+    
     return redirect(url_for('inventory'))
-
-@app.route('/orders')
-def orders():
-    return render_template('orders.html')
-
 @app.route('/reports')
 def reports():
     return render_template('reports.html')
@@ -126,9 +157,112 @@ def settings():
 def users():
     return render_template('users.html')
 
+#ordering, cart and checkout
+@app.route('/orders', methods=['GET'])
+def orders():
+    orders = Order.query.all()
+    return render_template('orders.html', orders=orders)
+
+@app.route('/order/new', methods=['GET', 'POST'])
+def new_order():
+    form = OrderForm()
+    form.inventory_item.choices = [(item.id, item.name) for item in InventoryItem.query.all()]
+    if form.validate_on_submit():
+        order = Order(user_id=1)  # Replace with actual user_id
+        db.session.add(order)
+        db.session.commit()
+        order_item = OrderItem(order_id=order.id,
+                               inventory_item_id=form.inventory_item.data,
+                               quantity=form.quantity.data,
+                               price=InventoryItem.query.get(form.inventory_item.data).price)
+        db.session.add(order_item)
+        db.session.commit()
+        return redirect(url_for('orders'))
+    return render_template('new_order.html', form=form)
+
+@app.route('/order/<int:order_id>', methods=['GET'])
+def order_detail(order_id):
+    order = Order.query.get_or_404(order_id)
+    return render_template('order_detail.html', order=order)
+
+@app.route('/add_to_cart/<int:item_id>', methods=['POST'])
+def add_to_cart(item_id):
+    cart = session['cart']
+    item_id_str = str(item_id)  # Always convert item_id to string when storing in session
+    cart[item_id_str] = cart.get(item_id_str, 0) + 1
+
+    session.modified = True  # Mark session as modified to save changes
+    return redirect(url_for('products'))
+
+@app.route('/cart')
+def cart():
+    cart = session.get('cart', {})
+    items = [(InventoryItem.query.get(int(item_id)), quantity) for item_id, quantity in cart.items()]
+    return render_template('cart.html', items=items)
+
+@app.route('/remove_from_cart/<int:item_id>', methods=['POST'])
+def remove_from_cart(item_id):
+    cart = session.get('cart', {})
+    item_id_str = str(item_id)  # Convert item_id to string to match session keys
+    
+    if item_id_str in cart:
+        del cart[item_id_str]  # Remove the item from the cart dictionary
+        session['cart'] = cart
+        session.modified = True  # Mark session as modified to save changes
+    
+    return redirect(url_for('cart'))
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if request.method == 'POST':
+        user_id = 1  # Replace with actual user ID
+        order = Order(user_id=user_id)
+        db.session.add(order)
+        db.session.commit()
+        cart = session.get('cart', {})
+        for item_id, quantity in cart.items():
+            item = InventoryItem.query.get(item_id)
+            order_item = OrderItem(order_id=order.id,
+                                   inventory_item_id=item_id,
+                                   quantity=quantity,
+                                   price=item.price)
+            db.session.add(order_item)
+        db.session.commit()
+        session.pop('cart', None)
+        return redirect(url_for('order_confirmation', order_id=order.id))
+    return render_template('checkout.html')
+
+@app.route('/order_confirmation/<int:order_id>')
+def order_confirmation(order_id):
+    order = Order.query.get_or_404(order_id)
+    return render_template('order_confirmation.html', order=order)
+
+
+#currency
+@app.template_filter('currency')
+def currency_format(value, currency="KES"):
+    if not isinstance(value, (int, float)):
+        return value  # Return the value unchanged if it's not a number
+    return f"{currency} {value:,.2f}"
+
+#dispatch
+@app.route('/dispatch_order/<int:order_id>', methods=['POST'])
+def dispatch_order(order_id):
+    order = Order.query.get_or_404(order_id)
+    
+    if order.status != 'Dispatched':
+        for item in order.items:
+            inventory_item = InventoryItem.query.get(item.inventory_item_id)
+            if inventory_item:
+                inventory_item.stock -= item.quantity
+                db.session.commit()
+        
+        order.status = 'Dispatched'
+        db.session.commit()
+    
+    return redirect(url_for('order_detail', order_id=order_id))
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
-

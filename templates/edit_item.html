@@ -29,6 +29,10 @@
                 <label for="description">Description</label>
                 <textarea id="description" name="description">{{ item.description }}</textarea>
             </div>
+            <div class="input-group">
+                <label for="stock">Stock</label>
+                <input type="number" id="stock" name="stock" value="{{ item.stock }}" required>
+            </div>
             <button type="submit">Update Item</button>
         </form>
     </main>
