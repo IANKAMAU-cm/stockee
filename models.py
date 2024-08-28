@@ -18,10 +18,12 @@ class InventoryItem(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
+    quantity = db.Column(db.String(50), nullable=False)
+    unit = db.Column(db.String(50), nullable=False)
     price = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(255), nullable=True)
     stock = db.Column(db.Integer, default=0)
+    image = db.Column(db.String(100), nullable=True)  # New field to store image filename
 
     def __repr__(self):
         return f'<InventoryItem {self.name}>'
@@ -30,6 +32,9 @@ class Order(db.Model):
     __tablename__ = 'order'
     
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.String(50), default='Pending')

@@ -6,134 +6,197 @@
     <title>Products - Stockee</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
-    body, h2, table {
-    margin: 0;
-    padding: 0;
-}
+        body, h2, table {
+            margin: 0;
+            padding: 0;
+        }
 
-body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    background-color: #f4f4f4;
-    color: #333;
-}
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+        }
 
-header {
-    background: blue;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-}
+        header {
+            background: darkgoldenrod;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
 
-header a {
-    color: #fff;
-    text-decoration: none;
-    font-weight: bold;
-    font-size: 16px;
-}
+        header a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
+        }
 
-header a:hover {
-    text-decoration: underline;
-}
+        header a:hover {
+            text-decoration: underline;
+        }
 
-main {
-    width: 80%;
-    margin: 20px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
+        main {
+            width: 100%;
+            max-width: 1580px;
+            margin: 10px auto;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
 
-h2 {
-    border-bottom: 2px solid #333;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
-    font-size: 24px;
-}
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
 
-.cart-button {
-    display: inline-block;
-    margin-bottom: 20px;
-    padding: 10px 20px;
-    background: #007bff;
-    color: #fff;
-    text-decoration: none;
-    border-radius: 5px;
-    font-size: 16px;
-}
+        .logo-header {
+            font-size: 24px;
+            font-weight: bold;
+            padding-left: 10px;
+            
+        }
 
-.cart-button:hover {
-    background: #0056b3;
-}
+        .cart-button {
+            display: inline-block; /* Ensure the button takes only the necessary width */
+            margin-bottom: 20px;
+            padding: 5px 10px; /* Adjust padding for a smaller button */
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px; /* Adjust font size as needed */
+            width: auto;
+            
+            max-width: 150px;
+            text-align: center; /* Center text inside the button */
+            box-sizing: border-box; /* Include padding and border in the width */
+        }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-}
+        .cart-button:hover {
+            background: #0056b3;
+        }
 
-table th, table td {
-    padding: 12px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
+        /* Responsive Grid Layout */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* Four columns per row */
+            gap: 20px; /* Space between grid items */
+            margin: 0 auto; /* Center the grid if needed */
+            max-width: 1200px; /* Maximum width of the grid container */
+        }
+        .product-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px; /* Adjust padding to control card size */
+            text-align: center;
+            transition: box-shadow 0.3s ease;
+            box-sizing: border-box;
+        }
 
-table th {
-    background: #f4f4f4;
-    font-weight: bold;
-}
 
-table td button {
-    background: #28a745;
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
-}
+        .product-card img {
+            width: 100%;
+            max-width: 150px; /* Set the maximum width for the images */
+            height: auto;
+            border-radius: 8px;
+            object-fit: cover; /* Ensure the image fits within the container */
+            margin: 0 auto;
+        }
 
-table td button:hover {
-    background: #218838;
-}
+        .product-card h3 {
+            font-size: 18px;
+            margin: 10px 0;
+        }
 
-form {
-    display: inline;
-}
+        .product-card p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
 
+        .product-card button {
+            background: #28a745;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 60%;
+        }
+
+        .product-card button:hover {
+            background: #218838;
+        }
+
+        form {
+            display: inline;
+        }
+
+        /* Media Queries for Responsive Design */
+        @media (max-width: 1600px) {
+            .products-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .cart-button {
+                width: 100%;
+                text-align: center;
+            }
+
+            header a {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            header a {
+                font-size: 14px;
+            }
+        }
+        @media (max-width: 576px) {
+            .products-grid {
+                grid-template-columns: 1fr; /* One column on very small screens */
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <a href="{{ url_for('login') }}">Admin Login</a>
+    <!--<a href="{{ url_for('login') }}">Admin Login</a>-->
+    <div class="logo-header">
+        Stockee
+    </div>
     </header>
     <main>
         <h2>Products</h2>
         <a href="{{ url_for('cart') }}" class="cart-button">View Cart</a>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                <tr>
-                    <td>{{ item.name }}</td>
-                    <td>{{ item.price|currency }}</td>
-                    <td>{{ item.description }}</td>
-                    <td>
-                        <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST">
-                            <button type="submit">Add to Cart</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="products-grid">
+            {% for item in items %}
+            <div class="product-card">
+                {% if item.image %}
+                <img src="{{ url_for('static', filename='images/' + item.image) }}" alt="{{ item.name }}" class="product-image">
+                {% else %}
+                <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Default Image" class="product-image">
+                {% endif %}
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+                <p>Price: {{ item.price|currency }}</p>
+                <p>Quantity: {{ item.quantity }} {{ item.unit }}</p>
+                <form action="{{ url_for('add_to_cart', item_id=item.id) }}" method="POST">
+                    <button type="submit">Add to Cart</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
     </main>
 </body>
 </html>

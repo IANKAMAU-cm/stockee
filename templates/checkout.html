@@ -13,11 +13,19 @@
     <main>
         <h2>Checkout</h2>
         <form method="POST">
-            <div>
+            <div class="input-group">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="input-group">
+                <label for="phone">Phone Number:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div class="input-group">
                 <label for="address">Shipping Address:</label>
                 <input type="text" id="address" name="address" required>
             </div>
-            <div>
+            <div class="input-group">
                 <button type="submit">Place Order</button>
             </div>
         </form>

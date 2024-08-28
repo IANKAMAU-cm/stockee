@@ -83,6 +83,11 @@
         button:hover {
             background-color: #c82333;
         }
+        .total-value {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 20px;
+        }
     </style>
 
 </head>
@@ -119,6 +124,9 @@
                 {% endfor %}
             </tbody>
         </table>
+        <div class="total-value">
+            Total Value: {{ total_value }} KSh
+        </div>
     </main>
 </body>
 </html>

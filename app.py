@@ -4,12 +4,29 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, InventoryItem, Order, OrderItem
 from forms import OrderForm
 from datetime import datetime
+import requests
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, DecimalField, IntegerField, FileField, SubmitField
+from wtforms.validators import DataRequired
+import os
+from werkzeug.utils import secure_filename
+from forms import ProductForm
 
 
+#import stripe 
+
+#stripe.api_key = "your-stripe-secret-key"
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+# Define where to store uploaded images
+UPLOAD_FOLDER = 'static/images'
+ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # Initialize the db with the Flask app
 db.init_app(app)
@@ -83,39 +100,63 @@ def inventory():
 
 @app.route('/add-item', methods=['GET', 'POST'])
 def add_item():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        quantity = request.form.get('quantity')
-        price = request.form.get('price')
-        description = request.form.get('description')
-        stock = request.form.get('stock')
-
-        new_item = InventoryItem(name=name, quantity=quantity, price=price, description=description, stock=stock)
+    form = ProductForm()
+    if form.validate_on_submit():
+        image_file = form.image.data
+        filename = None
+        if image_file and allowed_file(image_file.filename):
+            filename = secure_filename(image_file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            try:
+                image_file.save(image_path)
+            except Exception as e:
+                flash(f'Error saving image: {str(e)}')
+                return redirect(url_for('add_item'))
+        
+        new_item = InventoryItem(
+            name=form.name.data,
+            description=form.description.data,
+            price=form.price.data,
+            quantity=form.quantity.data,
+            unit=form.unit.data,
+            stock=form.stock.data,
+            image=filename
+        )
         db.session.add(new_item)
         db.session.commit()
-
         flash('Item added successfully.')
         return redirect(url_for('inventory'))
-
-    return render_template('add_item.html')
+    return render_template('add_item.html', form=form)
 
 @app.route('/edit-item/<int:item_id>', methods=['GET', 'POST'])
 def edit_item(item_id):
     item = InventoryItem.query.get_or_404(item_id)
+    form = ProductForm(obj=item)
 
-    if request.method == 'POST':
-        item.name = request.form.get('name')
-        item.quantity = request.form.get('quantity')
-        item.price = request.form.get('price')
-        item.description = request.form.get('description')
-        item.stock = request.form.get('stock')
-
+    if form.validate_on_submit():
+        item.name = form.name.data
+        item.description = form.description.data
+        item.price = form.price.data
+        item.quantity = form.quantity.data
+        item.stock = form.stock.data
+        
+        image_file = form.image.data
+        if image_file and allowed_file(image_file.filename):
+            filename = secure_filename(image_file.filename)
+            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            try:
+                image_file.save(image_path)
+                item.image = filename
+            except Exception as e:
+                flash(f'Error saving image: {str(e)}')
+                return redirect(url_for('edit_item', item_id=item_id))
+        
         db.session.commit()
-
         flash('Item updated successfully.')
         return redirect(url_for('inventory'))
 
-    return render_template('edit_item.html', item=item)
+    return render_template('edit_item.html', form=form, item=item)
+
 #deleting an item from inventory
 @app.route('/delete_item/<int:item_id>', methods=['POST'])
 def delete_item(item_id):
@@ -198,7 +239,9 @@ def add_to_cart(item_id):
 def cart():
     cart = session.get('cart', {})
     items = [(InventoryItem.query.get(int(item_id)), quantity) for item_id, quantity in cart.items()]
-    return render_template('cart.html', items=items)
+    # Calculate the total value
+    total_value = sum(item.price * quantity for item, quantity in items)
+    return render_template('cart.html', items=items, total_value=total_value)
 
 @app.route('/remove_from_cart/<int:item_id>', methods=['POST'])
 def remove_from_cart(item_id):
@@ -215,8 +258,11 @@ def remove_from_cart(item_id):
 @app.route('/checkout', methods=['GET', 'POST'])
 def checkout():
     if request.method == 'POST':
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
         user_id = 1  # Replace with actual user ID
-        order = Order(user_id=user_id)
+        order = Order(user_id=user_id, name=name, phone=phone, address=address)
         db.session.add(order)
         db.session.commit()
         cart = session.get('cart', {})

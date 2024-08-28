@@ -1,41 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Stockee</title>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stockee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
 
-    <body>
-        <!--Header-->
-        <header>
-            <div class="logo">Stockee</div>
-            <div class="search-bar">
-                <input type="text" placeholder="Search...">
-            </div>
+        body {
+            display: flex;
+            flex-direction: column;
+        }
 
-            <div class="user-profile">
-                <div class="profile-icon">Profile</div>
-                <div class="settings-icon">Settings</div>
-                <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
-            </div>
-        </header>
+        header {
+            background: darkgoldenrod;
+            color: #fff;
+            padding: 10px;
+            height: 60px; /* Adjust header height as needed */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000; /* Ensure header is above other elements */
+            position: fixed;
+            width: 100%;
+        }
 
-        <!--sidebar navigation-->
-        <nav class="sidebar">
-            <ul>
-                <li><a href="{{ url_for('index') }}">Dashboard</a></li>
-                <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
-                <li><a href="{{ url_for('orders') }}">Orders</a></li>
-                <li><a href="{{ url_for('reports') }}">Reports</a></li>
-                <li><a href="{{ url_for('notifications') }}">Notifications</a></li>
-                <li><a href="{{ url_for('settings') }}">Settings</a></li>
-                <li><a href="{{ url_for('users') }}">User Management</a></li>
-            </ul>
-        </nav>
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
 
-        <!--Main Dashboard area-->
+        .search-bar input {
+            padding: 5px;
+            font-size: 16px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-profile a, .user-profile .profile-icon, .user-profile .settings-icon {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .sidebar {
+            width: 185px; /* Adjust width as needed */
+            background: rgb(33, 209, 240);
+            color: #fff;
+            padding: 20px;
+            box-sizing: border-box;
+            position: fixed;
+            height: calc(100vh - 60px); /* Full height minus header height */
+            top: 60px; /* Align with header */
+            left: 0;
+            overflow-y: auto; /* Ensure sidebar is scrollable if content overflows */
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row; /* Sidebar and main content in a row */
+            flex: 1;
+            margin-top: 60px; /* Space for the fixed header */
+            margin-left: -30px; /* Space for the fixed sidebar */
+        }
+
+        main {
+            flex: 1;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow-x: hidden; /* Hide horizontal overflow */
+        }
+
+        .overview-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 94px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: #fff;
+            padding: 30px;
+            width: 285px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 18px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .graphical-reports {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 110px;
+            margin-bottom: 20px;
+        }
+
+        .graph {
+            background: #fff;
+            width: 130%;
+            height: 400px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-bottom: 20px;
+        }
+
+        .quick-actions button {
+            max-width: 200px;
+            padding: 15px;
+            background: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .quick-actions button:hover {
+            background: #0056b3;
+        }
+
+        footer {
+            background: rgb(59, 200, 243);
+            color: #fff;
+            text-align: center;
+            padding: 10px;
+            height: 50px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <!--Header-->
+    <header>
+        <div class="logo">Stockee</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Search...">
+        </div>
+        <div class="user-profile">
+            <div class="profile-icon">Profile</div>
+            <div class="settings-icon">Settings</div>
+            <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
+        </div>
+    </header>
+
+    <!--Sidebar Navigation-->
+    <nav class="sidebar">
+        <ul>
+            <li><a href="{{ url_for('index') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+            <li><a href="{{ url_for('orders') }}">Orders</a></li>
+            <li><a href="{{ url_for('reports') }}">Reports</a></li>
+            <li><a href="{{ url_for('notifications') }}">Notifications</a></li>
+            <li><a href="{{ url_for('settings') }}">Settings</a></li>
+            <li><a href="{{ url_for('users') }}">User Management</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!--Main Dashboard Area-->
         <main>
             <!--Overview Panel-->
             <section class="overview-panel">
@@ -52,20 +221,20 @@
                 <div class="graph">Top-Selling Products</div>
             </section>
 
-            <!--Quick actions-->
+            <!--Quick Actions-->
             <section class="quick-actions">
                 <button>Add New Product</button>
-                <button>Generate report</button>
+                <button>Generate Report</button>
                 <button>Notifications</button>
             </section>
-
         </main>
+    </div>
 
-        <!--Footer-->
-        <footer>
-            <p><a href="#">Help/Support</a> | <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a></p>
-        </footer>
+    <!--Footer-->
+    <footer>
+        <p><a href="#">Help/Support</a> | <a href="#">Terms of Service</a> | <a href="#">Privacy Policy</a></p>
+    </footer>
 
-        <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    </body>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
 </html>
