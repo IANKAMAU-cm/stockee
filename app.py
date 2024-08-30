@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, InventoryItem, Order, OrderItem
 from forms import OrderForm
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, DecimalField, IntegerField, FileField, SubmitField
@@ -81,10 +82,34 @@ def register():
 
 @app.route('/index')
 def index():
+    # Define the threshold for low stock
+    low_stock_threshold = 20
+
+    # Calculate total inventory value
+    inventory_items = InventoryItem.query.all()
+    total_inventory_value = sum(item.price * item.stock for item in inventory_items)
+    # Identify low stock items
+    low_stock_items = [item for item in inventory_items if item.stock < low_stock_threshold]
+    # Retrieve the most recent orders (limit to, say, 5 most recent)
+    recent_orders = Order.query.order_by(Order.date_created.desc()).limit(5).all()
+
+    # Fetch stock levels by product
+    stock_data = db.session.query(InventoryItem.name, InventoryItem.stock).all()
+    
+    # Query to get the top-selling products
+    top_selling_products = db.session.query(
+        InventoryItem.name, db.func.sum(OrderItem.quantity).label('total_sold')
+    ).join(OrderItem).group_by(InventoryItem.name).order_by(db.func.sum(OrderItem.quantity).desc()).limit(5).all()
+
+    # Adjusted code to handle data correctly top-selling products
+    product_names = [item for item, total_sold in top_selling_products]
+    total_sold = [total_sold for item, total_sold in top_selling_products]
+
+
     if 'user_id' not in session:
         flash('Please log in to access the dashboard')
         return redirect(url_for('login'))
-    return render_template('index.html')
+    return render_template('index.html', total_inventory_value=total_inventory_value, low_stock_items=low_stock_items, recent_orders=recent_orders, stock_data=stock_data, product_names=product_names, total_sold=total_sold) # Retrieve sales data from the database
 
 @app.route('/logout')
 def logout():
@@ -182,9 +207,13 @@ def delete_item(item_id):
         flash(f'Error occurred: {str(e)}', 'error')
     
     return redirect(url_for('inventory'))
+
+
 @app.route('/reports')
 def reports():
     return render_template('reports.html')
+
+
 
 @app.route('/notifications')
 def notifications():

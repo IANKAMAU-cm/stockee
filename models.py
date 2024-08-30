@@ -40,7 +40,7 @@ class Order(db.Model):
     status = db.Column(db.String(50), default='Pending')
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     items = db.relationship('OrderItem', backref='order', lazy=True)
-
+    date_created = db.Column(db.DateTime, default=datetime.utcnow) 
     def __repr__(self):
         return f'<Order {self.id}>'
 

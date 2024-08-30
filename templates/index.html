@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stockee</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         html, body {
             height: 100%;
@@ -57,7 +58,7 @@
 
         .sidebar {
             width: 185px; /* Adjust width as needed */
-            background: rgb(33, 209, 240);
+            background: rgb(144, 228, 34);
             color: #fff;
             padding: 20px;
             box-sizing: border-box;
@@ -104,7 +105,7 @@
         .overview-panel {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 94px;
+            gap: 100px;
             margin-bottom: 20px;
         }
 
@@ -127,13 +128,13 @@
         .graphical-reports {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 110px;
+            gap: 260px;
             margin-bottom: 20px;
         }
 
         .graph {
             background: #fff;
-            width: 130%;
+            width: 185%;
             height: 400px;
             padding: 20px;
             border-radius: 8px;
@@ -174,6 +175,77 @@
             height: 50px;
             position: relative;
         }
+        .total-inventory-value {
+            background-color: #f5b24d;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        .low-stock-items {
+            background-color: #f5b24d;
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .low-stock-items h3 {
+            margin-top: 0;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .low-stock-items ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .low-stock-items ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid white;
+        }
+
+        .low-stock-items ul li:last-child {
+            border-bottom: none;
+        }
+        ul {
+            color: white;
+            list-style: none;
+        }
+        .recent-orders {
+            background-color: #f5b24d;
+            padding: 20px;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .recent-orders h3 {
+            margin-top: 0;
+            font-size: 20px;
+            text-align: center;
+        }
+
+        .recent-orders ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .recent-orders ul li {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .recent-orders ul li:last-child {
+            border-bottom: none;
+        }
+
+        .recent-orders ul li span {
+            display: block;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+        }
     </style>
 </head>
 <body>
@@ -208,17 +280,106 @@
         <main>
             <!--Overview Panel-->
             <section class="overview-panel">
-                <div class="card">Total Inventory Value</div>
-                <div class="card">Low Stock Items</div>
-                <div class="card">Recent Orders</div>
-                <div class="card">Sales Trends</div>
+                <div class="card total-inventory-value">Inventory Value: {{ total_inventory_value|currency }}</div>
+                <div class="card low-stock-items">
+                    <h3>Low Stock Items</h3>
+                    <ul>
+                        {% for item in low_stock_items %}
+                            <li>{{ item.name }}: {{ item.stock }} items left</li>
+                        {% else %}
+                            <li>No low stock items.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="card recent-orders">
+                    <h3>Recent Orders</h3>
+                    <ul>
+                        {% for order in recent_orders %}
+                            <li>
+                                Order #{{ order.id }} - {{ order.customer_name }}
+                                <span>{{ order.date_created.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </li>
+                        {% else %}
+                            <li>No recent orders.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </section>
 
             <!--Graphical Reports-->
             <section class="graphical-reports">
-                <div class="graph">Sales Over Time</div>
-                <div class="graph">Stock Levels by Category</div>
-                <div class="graph">Top-Selling Products</div>
+                <div class="graph">
+                    <h3>Stock Levels</h3>
+                    <canvas id="stockLevelsChart"></canvas>
+                    <script>
+                        // Safely pass the data from Flask to JavaScript
+                        var stockData = {
+                            labels: {{ stock_data | map(attribute=0) | list | tojson | safe }},
+                            datasets: [{
+                                label: 'Stock Levels by Product',
+                                data: {{ stock_data | map(attribute=1) | list | tojson | safe }},
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        };
+                
+                        // Check if data is valid before initializing the chart
+                        if (stockData.labels && stockData.labels.length > 0) {
+                            var ctx = document.getElementById('stockLevelsChart').getContext('2d');
+                            var stockLevelsChart = new Chart(ctx, {
+                                type: 'bar',
+                                data: stockData,
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false, // Allow the chart to stretch to the container's height
+                                    scales: {
+                                        y: {
+                                            beginAtZero: true
+                                        }
+                                    }
+                                }
+                            });
+                        } else {
+                            console.error("Invalid data for the chart. Check your data source.");
+                        }
+                    </script>
+                    
+                </div>
+
+                <div class="graph">
+                    <h3>Top Selling Products</h3>
+                    <canvas id="topSellingProductsChart"></canvas>
+                    <script>
+                        // Assuming product_names and total_sold are passed from Flask to the template
+                        var productNames = {{ product_names | safe }};
+                        var totalSold = {{ total_sold | safe }};
+                        
+                        var ctx = document.getElementById('topSellingProductsChart').getContext('2d');
+                        var topSellingProductsChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: productNames,
+                                datasets: [{
+                                    label: 'Total Sold',
+                                    data: totalSold,
+                                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                    borderColor: 'rgba(54, 162, 235, 1)',
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                </div>
             </section>
 
             <!--Quick Actions-->
