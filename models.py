@@ -41,6 +41,7 @@ class Order(db.Model):
     user = db.relationship('User', backref=db.backref('orders', lazy=True))
     items = db.relationship('OrderItem', backref='order', lazy=True)
     date_created = db.Column(db.DateTime, default=datetime.utcnow) 
+    order_items = db.relationship('OrderItem', backref='parent_order', lazy=True)
     def __repr__(self):
         return f'<Order {self.id}>'
 

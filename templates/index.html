@@ -71,7 +71,7 @@
 
         .sidebar ul {
             list-style: none;
-            padding: 0;
+            padding: 10px;
         }
 
         .sidebar ul li {
@@ -268,8 +268,7 @@
             <li><a href="{{ url_for('index') }}">Dashboard</a></li>
             <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
             <li><a href="{{ url_for('orders') }}">Orders</a></li>
-            <li><a href="{{ url_for('reports') }}">Reports</a></li>
-            <li><a href="{{ url_for('notifications') }}">Notifications</a></li>
+            <li><a href="{{ url_for('download_reports') }}">Reports</a></li>
             <li><a href="{{ url_for('settings') }}">Settings</a></li>
             <li><a href="{{ url_for('users') }}">User Management</a></li>
         </ul>
@@ -385,8 +384,6 @@
             <!--Quick Actions-->
             <section class="quick-actions">
                 <button>Add New Product</button>
-                <button>Generate Report</button>
-                <button>Notifications</button>
             </section>
         </main>
     </div>

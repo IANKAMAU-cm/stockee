@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_file, make_response
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -12,11 +12,10 @@ from wtforms.validators import DataRequired
 import os
 from werkzeug.utils import secure_filename
 from forms import ProductForm
-
-
-#import stripe 
-
-#stripe.api_key = "your-stripe-secret-key"
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+from io import BytesIO
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -63,7 +62,16 @@ def login():
 
 @app.route('/register', methods=['POST', 'GET'])
 def register():
+    # Set the limit for the maximum number of users
+    max_users = 3  # Change this value to your desired limit
+
     if request.method == 'POST':
+        # Check if the current number of users has reached the limit
+        user_count = User.query.count()
+        if user_count >= max_users:
+            flash('Registration limit reached. No more users can be registered.')
+            return redirect(url_for('register'))
+
         username = request.form.get('username')
         password = request.form.get('password')
 
@@ -209,9 +217,82 @@ def delete_item(item_id):
     return redirect(url_for('inventory'))
 
 
-@app.route('/reports')
-def reports():
-    return render_template('reports.html')
+@app.route('/download-reports')
+def download_reports():
+    # Fetch data from your database models
+    items = InventoryItem.query.all()
+    orders = Order.query.all()
+
+    # Prepare data for the Inventory DataFrame
+    inventory_data = {
+        "Product": [item.name for item in items],
+        "Quantity": [item.quantity for item in items],
+        "Unit": [item.unit for item in items],
+        "Price": [item.price for item in items],
+        "Stock": [item.stock for item in items],
+        "Description": [item.description for item in items]
+    }
+
+    df_inventory = pd.DataFrame(inventory_data)
+    
+
+
+    # Convert the 'Quantity' column to numeric, forcing errors to NaN
+    df_inventory['Quantity'] = pd.to_numeric(df_inventory['Quantity'], errors='coerce')
+
+    # Fill NaN values with 0 or drop them, depending on your use case
+    df_inventory['Quantity'].fillna(0, inplace=True)
+    # Alternatively, drop rows with NaN values
+    # df_inventory.dropna(subset=['Quantity'], inplace=True)
+
+    # Filter low stock items
+    df_low_stock = df_inventory[df_inventory['Quantity'] < 20]
+
+    # Prepare data for the Orders DataFrame
+    order_data = []
+    for order in orders:
+        for order_item in order.order_items:
+            order_data.append({
+                "Order ID": order.id,
+                "Customer Name": order.name,
+                "Phone": order.phone,
+                "Location": order.address,
+                "Product": order_item.inventory_item,
+                "Quantity": order_item.quantity
+            })
+
+    df_orders = pd.DataFrame(order_data)
+
+    # Generate PDF report
+    buffer = BytesIO()
+
+    # Create the figure and the PDF document
+    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+        df_inventory.to_excel(writer, sheet_name='Inventory', index=False)
+        df_low_stock.to_excel(writer, sheet_name='Low Stock Items', index=False)
+        df_orders.to_excel(writer, sheet_name='Orders', index=False)
+
+        workbook  = writer.book
+        worksheet = writer.sheets['Inventory']
+
+        # You can add some formatting here if needed
+        format1 = workbook.add_format({'num_format': '#,##0.00'})
+        worksheet.set_column('C:C', None, format1)  # Format price column
+
+    # Move to the beginning of the stream
+    buffer.seek(0)
+
+    # Create response
+    response = make_response(buffer.getvalue())
+    response.headers['Content-Disposition'] = 'inline; filename=report.xlsx'
+    response.headers['Content-Type'] = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+    return response
+
+
+#@app.route('/reports')
+#def reports():
+#    return render_template('reports.html')
 
 
 
