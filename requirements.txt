@@ -1,6 +1,8 @@
-Flask
+wheel
+setuptools
+Flask 3.0.3
 Flask-SQLAlchemy
-Werkzeug
+Werkzeug 3.0.3
 Flask-WTF
 matplotlib
 pandas
