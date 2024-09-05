@@ -1,9 +1,9 @@
 wheel
 setuptools
-Flask==3.0.3
+Flask==2.3.2
 Flask-SQLAlchemy==3.0.5
 SQLAlchemy==2.0.20
-Werkzeug==2.3.7
+Werkzeug==2.3.2
 Flask-WTF==1.1.1
 WTForms==3.0.1
 requests==2.31.0
